@@ -1,0 +1,51 @@
+#-- input dir
+indir: "/work/noaa/da/Hyun-Chul.Lee/soca-science-3dvar_100_5d/obs_out/2011102612/ctrl/"
+
+#-- input file name
+infile: "adt_ioda.20111026.nc"
+#infile: "sst_avhrr19.20111026.nc"
+
+#-- variable name to plot
+#variable: sea_surface_temperature
+variable: obs_absolute_dynamic_topography
+
+#-- data 2D/3D : default="True" (2D)
+data2D: "True"
+
+#-- output file name
+outfile: "adt_ioda.20111026.png"
+#outfile: "sst_avhrr19.20111026.png"
+
+#-- output dir
+outdir: "./"
+
+#-- type : "hofx0-2, ombg, oman", default="inc"
+type: "ombg"
+
+#-- qc : include good QC check
+qc: "True"
+
+#-- zupper : "upper depth", default=0
+zupper:
+
+#-- zlower : "lower depth", default=0
+zlower:
+
+#-- xeast : "upper longitude", default=180
+xeast:
+
+#-- xwest : "lower longitude", default=-180
+xwest:
+
+#-- ynorth : "upper latitude", default=90
+ynorth:
+
+#-- ysouth : "lower latitude", default=-90
+ysouth:
+
+#-- vmax : "maximum value of vaiable", default=100 or calculated for ombg,oman,inc
+vmax: 
+
+#-- vmin : "nimimum value of vaiable", default=-100 or calculated for ombg,oman,inc
+vmin: 
+ 
