@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 import netCDF4 as nc
 import numpy as np
 import argparse
@@ -164,10 +164,39 @@ def read_var(datapath, varname, datatype, qcflag):
         data[qc > 0] = np.nan
     return data, lons, lats, dep
 
+def read_gfs_var(datapath, varname, datatype, qcflag):
+    obsfiles = glob.glob(datapath+'*')
+    lats = np.array([])
+    lons = np.array([])
+    data = np.array([])
+    qc = np.array([])
+    dep = np.array([])
+    for f in obsfiles:
+        datanc = nc.Dataset(f)
+        lattmp = datanc.variables['latitude@MetaData'][:]
+        lontmp = datanc.variables['longitude@MetaData'][:]
+        datatmp = datanc.variables[varname+'@'+datatype][:]
+        deptmp = datanc.variables['height@MetaData'][:]
+        try:
+            qctmp = datanc.variables[varname+'@EffectiveQC'][:]
+        except:
+            qctmp = datanc.variables[varname+'@EffectiveQC0'][:]
+        datanc.close()
+        lats = np.concatenate((lats,lattmp))
+        lons = np.concatenate((lons,lontmp))
+        data = np.concatenate((data,datatmp))
+        dep = np.concatenate((dep,deptmp))
+        qc = np.concatenate((qc,qctmp))
+    if (qcflag):
+        data[qc > 0] = np.nan
+    return data, lons, lats, dep
 
-def gen_figure(inpath, outpath, datatype, varname, d2d, qc, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
+
+def gen_figure(inpath, outpath, dataGFS, datatype, varname, d2d, qc, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
    #read the files to get the 2D array to plot
-    if ( d2d ):
+    if ( dataGFS ):
+        data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
+    elif ( d2d ):
         data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
         upper = 0
         lower = 0
@@ -185,25 +214,28 @@ def gen_figure(inpath, outpath, datatype, varname, d2d, qc, upper, lower, Xupper
 
 if __name__ == "__main__":
 
-    inputs = open("plot_ioda_obs.yaml", 'r')
-    ind = yaml.load(inputs, Loader=yaml.FullLoader)
+   inputs = open("plot_ioda_obs.yaml", 'r')
+   #-- availe in PyYAML > 5.1
+   #ind = yaml.load(inputs, Loader=yaml.FullLoader)
+   ind = yaml.load(inputs)
+  
+   input = ind["indir"]+ind["infile"]
+   output =  ind["outdir"]+ind["outfile"]
+   dataGFS = ind["dataGFS"] or "False"
+   type = ind["type"] or "inc"
+   variable = ind["variable"]
+   data2D = ind["data2D"] or "True"
+   qc = ind["qc"]
+   zupper = ind["zupper"] or "0"
+   zlower = ind["zlower"] or "0"
+   xeast = ind["xeast"] or "180"
+   xwest = ind["xwest"] or "-180"
+   ynorth = ind["ynorth"] or "90" 
+   ysouth = ind["ysouth"] or "-90" 
+   vmax = ind["vmax"] or "100" 
+   vmin = ind["vmin"] or "-100" 
    
-    input = ind["indir"]+ind["infile"]
-    output =  ind["outdir"]+ind["outfile"]
-    type = ind["type"] or "inc"
-    variable = ind["variable"]
-    data2D = ind["data2D"] or "True"
-    qc = ind["qc"]
-    zupper = ind["zupper"] or "0"
-    zlower = ind["zlower"] or "0"
-    xeast = ind["xeast"] or "180"
-    xwest = ind["xwest"] or "-180"
-    ynorth = ind["ynorth"] or "90" 
-    ysouth = ind["ysouth"] or "-90" 
-    vmax = ind["vmax"] or "100" 
-    vmin = ind["vmin"] or "-100" 
-        
-    print(input) 
-    print(type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   print(input) 
+   print(type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
 
-    gen_figure(input,output,type,variable,data2D,qc,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   gen_figure(input,output,dataGFS,type,variable,data2D,qc,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
