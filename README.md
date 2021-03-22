@@ -1,8 +1,8 @@
 # ioda_plot
 
-This is an plotting suite for ioda format data, expanded from
-/scratch1/NCEPDEV/da/Cory.R.Martin/JEDI/tutorial_dec2020/python/plot_
-jedi_obs.py
+This is an plotting suite for ioda format data, 
+expanded from
+/scratch1/NCEPDEV/da/Cory.R.Martin/JEDI/tutorial_dec2020/python/plot_jedi_obs.py
 
 The expansions are mainly
 1. A yaml file of plot_ioda_obs.yaml sets parameters of plot_ioda_obs.py.
