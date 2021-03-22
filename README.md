@@ -1,26 +1,27 @@
 # ioda_plot
+<p>
+This is an plotting suite for ioda format data, expanded from <br>
+/scratch1/NCEPDEV/da/Cory.R.Martin/JEDI/tutorial_dec2020/python/plot_jedi_obs.py <br>
 
-This is an plotting suite for ioda format data, 
-expanded from
-/scratch1/NCEPDEV/da/Cory.R.Martin/JEDI/tutorial_dec2020/python/plot_jedi_obs.py
+<br>
 
-The expansions are mainly
-1. A yaml file of plot_ioda_obs.yaml sets parameters of plot_ioda_obs.py.
-2. It is able to handle for ioda format data JEDI/SOCA as well as GFS.
-3. It is able to filter data by regional (horizonal/vertical) sets and Max/Min of data.
+The expansions are mainly <br>
+1. A yaml file of plot_ioda_obs.yaml sets parameters of plot_ioda_obs.py. <br>
+2. It is able to handle for ioda format data JEDI/SOCA as well as GFS. <br>
+3. It is able to filter data by regional (horizonal/vertical) sets and Max/Min of data. <br>
 
-Remark: This plotting suit is currently only available in Orion 
-        for the anaconda/PyYAML versions
+<b>Remark</b> This plotting suit is currently only available in Orion <br>
+        for the anaconda/PyYAML versions <br>
+<br>
 
-To run the plot_ioda_obs.py in Orion,
-- git clone
-  git clone https://github.com/hyunchul386/ioda_plot.git
-- set modules
-  module use -a /home/cmartin/opt/modulefiles
-  module load anaconda/anaconda3-2020.04.02
-- run code
-  cd ioda_plot
-  edit plot_ioda_obs.yaml for the data
-  python plot_ioda_obs.py
-        
-        
+To run the plot_ioda_obs.py in Orion, <br>
+- git clone <br>
+  git clone https://github.com/hyunchul386/ioda_plot.git <br>
+- set modules <br>
+  module use -a /home/cmartin/opt/modulefiles <br>
+  module load anaconda/anaconda3-2020.04.02 <br>
+- run code <br>
+  cd ioda_plot <br>
+  edit plot_ioda_obs.yaml for the data <br>
+  python plot_ioda_obs.py <br>
+</p>
