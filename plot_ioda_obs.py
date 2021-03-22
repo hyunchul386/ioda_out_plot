@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 import netCDF4 as nc
 import numpy as np
 import argparse
@@ -12,7 +12,7 @@ import glob
 import os
 import yaml
 
-def plot_world_map(lons, lats, data, dep, metadata, plotpath, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmx, Vmn):
+def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmx, Vmn):
     # plot generic world map
     latf = []
     lonf = []
@@ -44,17 +44,16 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, upper, lower, Xupp
    #cenlon = 0.5 * ( float(Xupper) + float(Xlower) )
     cenlon = 0.0
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude=cenlon))
-    #ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude=0))
-    #ax.add_feature(cfeature.GSHHSFeature(scale='auto'))
     ax.set_extent([-180, 180, -90, 90])
     #ax.set_extent([-120, 80, -30, 30])
     #ax.set_extent([float(Xlower), float(Xupper), float(Ylower), float(Yupper)])
     #ax.add_feature(cfeature.COASTLINE)
     ax.coastlines(resolution='10m');
-    #ax.stock_img();
     cmap = 'viridis'
     cbarlabel = '%s@%s' % (metadata['var'], metadata['datatype'])
-    if ( upper == lower ):
+    if ( dataGFS ):
+        plttitle = '%s platform %s@%s in height %s - %s ' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(lower), str(upper))
+    elif ( upper == lower ):
         plttitle = '%s platform %s@%s at %s m' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper))
     else:
         plttitle = '%s platform %s@%s in %s - %s m' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper), str(lower))
@@ -75,13 +74,19 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, upper, lower, Xupp
         vmin = float(Vmn)
         cmap = 'rainbow'
     #--- depth filtering
-    for i in range(len(dep)):
-        if ( float(dep[i]) <= float(lower) and float(dep[i]) >= float(upper) ):
-            latf.append(lats[i])
-            lonf.append(lons[i])
-            datf.append(data[i])
+    if ( dataGFS ):
+        for i in range(len(dep)):
+            if ( float(dep[i]) >= float(lower) and float(dep[i]) <= float(upper) ):
+                latf.append(lats[i])
+                lonf.append(lons[i])
+                datf.append(data[i])
+    else:
+        for i in range(len(dep)):
+            if ( float(dep[i]) <= float(lower) and float(dep[i]) >= float(upper) ):
+                latf.append(lats[i])
+                lonf.append(lons[i])
+                datf.append(data[i])
     #--- regional filtering
-    print("float(Xupper):",float(Xupper),"float(Xlower):",float(Xlower))
     for i in range(len(datf)):
         if (float(Xupper) >= float(Xlower)):
             if ( lonf[i] <= float(Xupper) and lonf[i] >= float(Xlower) ):
@@ -164,15 +169,48 @@ def read_var(datapath, varname, datatype, qcflag):
         data[qc > 0] = np.nan
     return data, lons, lats, dep
 
+def read_gfs_var(datapath, varname, datatype, qcflag):
+    obsfiles = glob.glob(datapath+'*')
+    lats = np.array([])
+    lons = np.array([])
+    data = np.array([])
+    qc = np.array([])
+    dep = np.array([])
+    for f in obsfiles:
+        datanc = nc.Dataset(f)
+        lattmp = datanc.variables['latitude@MetaData'][:]
+        lontmp = datanc.variables['longitude@MetaData'][:]
+        datatmp = datanc.variables[varname+'@'+datatype][:]
+        deptmp = datanc.variables['height@MetaData'][:]
+        try:
+            qctmp = datanc.variables[varname+'@EffectiveQC'][:]
+        except:
+            qctmp = datanc.variables[varname+'@EffectiveQC0'][:]
+        datanc.close()
+        lats = np.concatenate((lats,lattmp))
+        lons = np.concatenate((lons,lontmp))
+        data = np.concatenate((data,datatmp))
+        dep = np.concatenate((dep,deptmp))
+        qc = np.concatenate((qc,qctmp))
+    if (qcflag):
+        data[qc > 0] = np.nan
+    return data, lons, lats, dep
 
-def gen_figure(inpath, outpath, datatype, varname, d2d, qc, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
+
+def gen_figure(inpath, outpath, dataGFS, datatype, varname, d2d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
    #read the files to get the 2D array to plot
-    if ( d2d ):
+    if ( dataGFS ):
+        data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
+        upper = hupper
+        lower = hlower
+    elif ( d2d ):
         data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
         upper = 0
         lower = 0
     else:
         data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
+        upper = zupper
+        lower = zlower
     obstype = '_'.join(inpath.split('/')[-1].split('_')[0:2])
    #plotpath = outpath+'/%s_%s_%s.png' % (obstype, varname, datatype)
     plotpath = outpath
@@ -180,30 +218,34 @@ def gen_figure(inpath, outpath, datatype, varname, d2d, qc, upper, lower, Xupper
                 'datatype': datatype,
                 'var': varname,
                 }
-    plot_world_map(lons, lats, data, dep, metadata, plotpath, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin)
+    plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin)
 
 
 if __name__ == "__main__":
 
-    inputs = open("plot_ioda_obs.yaml", 'r')
-    ind = yaml.load(inputs, Loader=yaml.FullLoader)
+   inputs = open("plot_ioda_obs.yaml", 'r')
+   #-- availe in PyYAML > 5.1
+   ind = yaml.load(inputs, Loader=yaml.FullLoader)
+   #ind = yaml.load(inputs)
+  
+   input = ind["indir"]+ind["infile"]
+   output =  ind["outdir"]+ind["outfile"]
+   dataGFS = ind["dataGFS"] or "False"
+   type = ind["type"] or "inc"
+   variable = ind["variable"]
+   data2D = ind["data2D"] or "True"
+   qc = ind["qc"]
+   zupper = ind["zupper"] or "0"
+   zlower = ind["zlower"] or "0"
+   hupper = ind["hupper"] or "50000"
+   hlower = ind["hlower"] or "0"
+   xeast = ind["xeast"] or "180"
+   xwest = ind["xwest"] or "-180"
+   ynorth = ind["ynorth"] or "90" 
+   ysouth = ind["ysouth"] or "-90" 
+   vmax = ind["vmax"] or "100" 
+   vmin = ind["vmin"] or "-100" 
    
-    input = ind["indir"]+ind["infile"]
-    output =  ind["outdir"]+ind["outfile"]
-    type = ind["type"] or "inc"
-    variable = ind["variable"]
-    data2D = ind["data2D"] or "True"
-    qc = ind["qc"]
-    zupper = ind["zupper"] or "0"
-    zlower = ind["zlower"] or "0"
-    xeast = ind["xeast"] or "180"
-    xwest = ind["xwest"] or "-180"
-    ynorth = ind["ynorth"] or "90" 
-    ysouth = ind["ysouth"] or "-90" 
-    vmax = ind["vmax"] or "100" 
-    vmin = ind["vmin"] or "-100" 
-        
-    print(input) 
-    print(type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   print(dataGFS,type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
 
-    gen_figure(input,output,type,variable,data2D,qc,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   gen_figure(input,output,dataGFS,type,variable,data2D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
