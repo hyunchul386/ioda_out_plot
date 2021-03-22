@@ -6,7 +6,7 @@ This is an plotting suite for ioda format data, expanded from <br>
 <br>
 
 The expansions are mainly <br>
-1. A yaml file of plot_ioda_obs.yaml sets parameters of plot_ioda_obs.py. <br>
+1. A yaml file of plot_ioda_data.yaml sets parameters of plot_ioda_data.py. <br>
 2. It is able to handle ioda format data from JEDI/SOCA as well as GFS. <br>
 3. It is able to filter data by regional (horizonal/vertical) sets and Max/Min of data. <br>
 
@@ -14,7 +14,7 @@ The expansions are mainly <br>
         for the anaconda/PyYAML versions <br>
 <br>
 
-To run the plot_ioda_obs.py in Orion, <br>
+To run the plot_ioda_data.py in Orion, <br>
 - git clone <br>
   git clone https://github.com/hyunchul386/ioda_plot.git <br>
 - set modules <br>
@@ -23,5 +23,5 @@ To run the plot_ioda_obs.py in Orion, <br>
 - run code <br>
   cd ioda_plot <br>
   edit plot_ioda_obs.yaml for the data <br>
-  python plot_ioda_obs.py <br>
+  python plot_ioda_data.py <br>
 </p>
