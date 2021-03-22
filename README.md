@@ -1,6 +1,6 @@
 # ioda_plot
 <p>
-This is an plotting suite for ioda format data, expanded from <br>
+This is a plotting suite for ioda format data, expanded from <br>
 /scratch1/NCEPDEV/da/Cory.R.Martin/JEDI/tutorial_dec2020/python/plot_jedi_obs.py <br>
 
 <br>
