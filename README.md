@@ -22,6 +22,6 @@ To run the plot_ioda_data.py in Orion, <br>
   module load anaconda/anaconda3-2020.04.02 <br>
 - run code <br>
   cd ioda_plot <br>
-  edit plot_ioda_obs.yaml for the data <br>
+  edit plot_ioda_data.yaml for the data <br>
   python plot_ioda_data.py <br>
 </p>
