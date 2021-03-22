@@ -7,7 +7,7 @@ indir: "./"
 infile: "sondes_tsen_3dvar-gfs_2020102812_0000.nc4"
 #infile: "sst_avhrr19.20111026.nc"
 
-#-- input dataGFS from GFS : "default=False"
+#-- input dataGFS from GFS : "default=False (JEDI/SOCA)"
 dataGFS: "True"
 
 #-- variable name to plot
