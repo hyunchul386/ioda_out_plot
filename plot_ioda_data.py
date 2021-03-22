@@ -223,7 +223,7 @@ def gen_figure(inpath, outpath, dataGFS, datatype, varname, d3d, qc, zupper, zlo
 
 if __name__ == "__main__":
 
-   inputs = open("plot_ioda_obs.yaml", 'r')
+   inputs = open("plot_ioda_data.yaml", 'r')
    #-- availe in PyYAML > 5.1
    ind = yaml.load(inputs, Loader=yaml.FullLoader)
    #ind = yaml.load(inputs)
