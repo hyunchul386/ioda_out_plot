@@ -14,8 +14,8 @@ dataGFS: "True"
 #variable: sea_surface_temperature
 variable: air_temperature
 
-#-- data 2D/3D : default="True" (2D)
-data2D:
+#-- data 2D/3D : default="True" (3D)
+data3D:
 
 #-- output file name
 outfile: "sondes_tsen_3dvar-gfs_2020102812_0000.png"

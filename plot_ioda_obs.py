@@ -197,20 +197,20 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
     return data, lons, lats, dep
 
 
-def gen_figure(inpath, outpath, dataGFS, datatype, varname, d2d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
+def gen_figure(inpath, outpath, dataGFS, datatype, varname, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
    #read the files to get the 2D array to plot
     if ( dataGFS ):
         data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
         upper = hupper
         lower = hlower
-    elif ( d2d ):
-        data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
-        upper = 0
-        lower = 0
-    else:
+    elif ( d3d ):
         data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
         upper = zupper
         lower = zlower
+    else:
+        data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
+        upper = 0
+        lower = 0
     obstype = '_'.join(inpath.split('/')[-1].split('_')[0:2])
    #plotpath = outpath+'/%s_%s_%s.png' % (obstype, varname, datatype)
     plotpath = outpath
@@ -233,7 +233,7 @@ if __name__ == "__main__":
    dataGFS = ind["dataGFS"] or "False"
    type = ind["type"] or "inc"
    variable = ind["variable"]
-   data2D = ind["data2D"] or "True"
+   data3D = ind["data3D"] or "True"
    qc = ind["qc"]
    zupper = ind["zupper"] or "0"
    zlower = ind["zlower"] or "0"
@@ -248,4 +248,4 @@ if __name__ == "__main__":
    
    print(dataGFS,type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
 
-   gen_figure(input,output,dataGFS,type,variable,data2D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   gen_figure(input,output,dataGFS,type,variable,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
