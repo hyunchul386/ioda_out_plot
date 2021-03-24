@@ -1,41 +1,44 @@
 #-- input dir
-#indir: "/work/noaa/da/Hyun-Chul.Lee/soca-science-3dvar_100_5d/obs_out/2011102612/ctrl/"
+indir: "/work/noaa/da/Hyun-Chul.Lee/soca-science-3dvar_100_5d/obs_out/2011102612/ctrl/"
 #indir: "/scratch2/NCEPDEV/climate/Hyun-Chul.Lee/JEDI/tutorial/work/gfsanl/Data/hofx"
-indir: "./"
+#indir: "./"
 
 #-- input file name
-infile: "sondes_tsen_3dvar-gfs_2020102812_0000.nc4"
+#infile: "sondes_tsen_3dvar-gfs_2020102812_0000.nc4"
 #infile: "sst_avhrr19.20111026.nc"
+infile: "insitu_prof_T.20111026.nc"
 
 #-- input dataGFS from GFS : "default=False (JEDI/SOCA)"
-dataGFS: "True"
+dataGFS: "False"
 
 #-- variable name to plot
+variable: sea_water_temperature
 #variable: sea_surface_temperature
-variable: air_temperature
+#variable: air_temperature
 
 #-- data 2D/3D : default="True" (3D)
 data3D:
 
 #-- output file name
-outfile: "sondes_tsen_3dvar-gfs_2020102812_0000.png"
+#outfile: "sondes_tsen_3dvar-gfs_2020102812_0000.png"
 #outfile: "sst_avhrr19.20111026.png"
+outfile: "insitu_prof_T.20111026.nc.png"
 
 #-- output dir
 outdir: "./"
 
 #-- type : "hofx0-2, ombg, oman", default="inc"
 #type: "ombg"
-type: "ObsValue"
+type: "ombg"
 
 #-- qc : include good QC check
 qc: "True"
 
 #-- zupper : "upper depth in OCN", default=0
-zupper: 
+zupper: 30
 
 #-- zlower : "lower depth in OCN", default=0
-zlower: 
+zlower: 50
 
 #-- hupper : "upper height in ATM", default=50000
 hupper: 
@@ -56,8 +59,8 @@ ynorth:
 ysouth:
 
 #-- vmax : "maximum value of vaiable", default=100 or calculated for ombg,oman,inc
-vmax: 250
+vmax:
 
 #-- vmin : "nimimum value of vaiable", default=-100 or calculated for ombg,oman,inc
-vmin: 190
+vmin:
  

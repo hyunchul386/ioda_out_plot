@@ -51,7 +51,7 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
     ax.coastlines(resolution='10m');
     cmap = 'viridis'
     cbarlabel = '%s@%s' % (metadata['var'], metadata['datatype'])
-    if ( dataGFS ):
+    if ( dataGFS == "True" ):
         plttitle = '%s platform %s@%s in height %s - %s ' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(lower), str(upper))
     elif ( upper == lower ):
         plttitle = '%s platform %s@%s at %s m' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper))
@@ -74,7 +74,7 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
         vmin = float(Vmn)
         cmap = 'rainbow'
     #--- depth filtering
-    if ( dataGFS ):
+    if ( dataGFS == "True"):
         for i in range(len(dep)):
             if ( float(dep[i]) >= float(lower) and float(dep[i]) <= float(upper) ):
                 latf.append(lats[i])
@@ -199,11 +199,14 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
 
 def gen_figure(inpath, outpath, dataGFS, datatype, varname, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
    #read the files to get the 2D array to plot
-    if ( dataGFS ):
+    print(dataGFS, d3d)
+    if  dataGFS == "True" :
+        print( "dataGFS:",dataGFS)
         data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
         upper = hupper
         lower = hlower
     elif ( d3d ):
+        print(d3d)
         data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
         upper = zupper
         lower = zlower
