@@ -4,42 +4,48 @@ indir: "/work/noaa/da/Hyun-Chul.Lee/s2s/3dvar_check/obs_out/2015/2015070500/ctrl
 
 #-- input file name
 #infile: "insitu_wod.20150705.nc"
-infile: "insitu_wod.20150705_ombg_T.nc"
+#infile: "insitu_wod.20150705_ombg_T.nc"
+#infile: "sst_noaa19.20150705_ombg_T.nc"
+infile: "sss_smap.jpl.20150705_ombg_S.nc"
 
 #-- input dataGFS from GFS : "default=False (JEDI/SOCA)"
 dataGFS: "False"
 
 #-- variable name to plot
-variable: sea_water_temperature
+#variable: sea_water_temperature
 #variable: sea_surface_temperature
+variable: sea_surface_salinity
 #variable: air_temperature
 
 #-- in netcdf variables are in group or not : default=False, if True then type is the group name
 varGroup: "True"
 
 #-- data 2D/3D : default="True" (3D)
-data3D:
+#data3D: "True"
+data3D: "False"
 
 #-- output file name
 #outfile: "sondes_tsen_3dvar-gfs_2020102812_0000.png"
 #outfile: "sst_avhrr19.20111026.png"
-outfile: "insitu_prof_T.20111026.nc.png"
+#outfile: "insitu_prof_T.20111026.nc.png"
+#outfile: "sst_noaa19.20150705_ombg_T.png"
+outfile: "sss_smap.jpl.20150705_ombg_S.png"
 
 #-- output dir
 outdir: "./"
 
 #-- type : "hofx0-2, ombg, oman", default="inc"
-#type: "ombg"
-type: "ObsValue"
+type: "ombg"
+#type: "ObsValue"
 
 #-- qc : include good QC check
 qc: "False"
 
 #-- zupper : "upper depth in OCN", default=0
-zupper: 30
+zupper: 50
 
 #-- zlower : "lower depth in OCN", default=0
-zlower: 50
+zlower: 100
 
 #-- hupper : "upper height in ATM", default=50000
 hupper: 

@@ -197,7 +197,7 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
         data[qc > 0] = np.nan
     return data, lons, lats, dep
 
-def read_varGroup(datapath, varname):
+def read_varGroup(datapath, varname, datatype, qcflag):
     obsfiles = glob.glob(datapath+'*')
     lats = np.array([])
     lons = np.array([])
@@ -210,11 +210,40 @@ def read_varGroup(datapath, varname):
         lontmp = datanc.variables['longitude'][:]
         datatmp = datanc.variables[varname][:]
         deptmp = datanc.variables['depth'][:]
+        qctmp = datanc.variables['qc'][:]
         datanc.close()
         lats = np.concatenate((lats,lattmp))
         lons = np.concatenate((lons,lontmp))
         data = np.concatenate((data,datatmp))
         dep = np.concatenate((dep,deptmp))
+        qc = np.concatenate((qc,qctmp))
+    if (qcflag):
+        data[qc > 0] = np.nan
+    return data, lons, lats, dep
+
+def read_2d_varGroup(datapath, varname, datatype, qcflag):
+    obsfiles = glob.glob(datapath+'*')
+    lats = np.array([])
+    lons = np.array([])
+    data = np.array([])
+    qc = np.array([])
+    dep = np.array([])
+    for f in obsfiles:
+        datanc = nc.Dataset(f)
+        lattmp = datanc.variables['latitude'][:]
+        lontmp = datanc.variables['longitude'][:]
+        datatmp = datanc.variables[varname][:]
+       #deptmp = datanc.variables['depth'][:]
+        qctmp = datanc.variables['qc'][:]
+        datanc.close()
+        lats = np.concatenate((lats,lattmp))
+        lons = np.concatenate((lons,lontmp))
+        data = np.concatenate((data,datatmp))
+       #dep = np.concatenate((dep,deptmp))
+        qc = np.concatenate((qc,qctmp))
+    dep = qc*0
+    if (qcflag):
+        data[qc > 0] = np.nan
     return data, lons, lats, dep
 
 
@@ -226,16 +255,19 @@ def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, d3d, qc, z
         data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
         upper = hupper
         lower = hlower
-    elif ( d3d ):
-        print(d3d)
+    elif ( d3d == "True"):
+        print("d3d=>", d3d)
         if varGroup == "True" :
-            data, lons, lats, dep = read_varGroup(inpath, varname)
+            data, lons, lats, dep = read_varGroup(inpath, varname, datatype, qc)
         else:
             data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
         upper = zupper
         lower = zlower
     else:
-        data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
+        if varGroup == "True" :
+            data, lons, lats, dep = read_2d_varGroup(inpath, varname, datatype, qc)
+        else:
+            data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
         upper = 0
         lower = 0
     obstype = '_'.join(inpath.split('/')[-1].split('_')[0:2])
@@ -274,5 +306,7 @@ if __name__ == "__main__":
    vmax = ind["vmax"] or "100" 
    vmin = ind["vmin"] or "-100" 
    
-   print(dataGFS,type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   print(dataGFS,type,variable,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+
    gen_figure(input,output,dataGFS,type,variable,varGroup,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+
