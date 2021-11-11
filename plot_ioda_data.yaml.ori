@@ -1,8 +1,13 @@
 #-- input dir
 indir: "/work/noaa/da/Hyun-Chul.Lee/s2s/3dvar_check/obs_out/2015/2015070500/ctrl/"
+#indir: "/work/noaa/da/Hyun-Chul.Lee/soca-science-3dvar_100_5d/obs_out/2011102612/ctrl/"
+#indir: "/scratch2/NCEPDEV/climate/Hyun-Chul.Lee/JEDI/tutorial/work/gfsanl/Data/hofx"
 #indir: "./"
 
 #-- input file name
+#infile: "sondes_tsen_3dvar-gfs_2020102812_0000.nc4"
+#infile: "sst_avhrr19.20111026.nc"
+#infile: "insitu_prof_T.20111026.nc"
 #infile: "insitu_wod.20150705.nc"
 infile: "insitu_wod.20150705_ombg_T.nc"
 
@@ -13,9 +18,6 @@ dataGFS: "False"
 variable: sea_water_temperature
 #variable: sea_surface_temperature
 #variable: air_temperature
-
-#-- in netcdf variables are in group or not : default=False, if True then type is the group name
-varGroup: "True"
 
 #-- data 2D/3D : default="True" (3D)
 data3D:
@@ -30,10 +32,10 @@ outdir: "./"
 
 #-- type : "hofx0-2, ombg, oman", default="inc"
 #type: "ombg"
-type: "ObsValue"
+type: "ombg"
 
 #-- qc : include good QC check
-qc: "False"
+qc: "True"
 
 #-- zupper : "upper depth in OCN", default=0
 zupper: 30

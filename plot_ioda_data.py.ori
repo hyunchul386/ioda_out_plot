@@ -6,7 +6,6 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import netCDF4 as nc
-from netCDF4 import Dataset
 import numpy as np
 import argparse
 import glob
@@ -197,28 +196,8 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
         data[qc > 0] = np.nan
     return data, lons, lats, dep
 
-def read_varGroup(datapath, varname):
-    obsfiles = glob.glob(datapath+'*')
-    lats = np.array([])
-    lons = np.array([])
-    data = np.array([])
-    qc = np.array([])
-    dep = np.array([])
-    for f in obsfiles:
-        datanc = nc.Dataset(f)
-        lattmp = datanc.variables['latitude'][:]
-        lontmp = datanc.variables['longitude'][:]
-        datatmp = datanc.variables[varname][:]
-        deptmp = datanc.variables['depth'][:]
-        datanc.close()
-        lats = np.concatenate((lats,lattmp))
-        lons = np.concatenate((lons,lontmp))
-        data = np.concatenate((data,datatmp))
-        dep = np.concatenate((dep,deptmp))
-    return data, lons, lats, dep
 
-
-def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
+def gen_figure(inpath, outpath, dataGFS, datatype, varname, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
    #read the files to get the 2D array to plot
     print(dataGFS, d3d)
     if  dataGFS == "True" :
@@ -228,10 +207,7 @@ def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, d3d, qc, z
         lower = hlower
     elif ( d3d ):
         print(d3d)
-        if varGroup == "True" :
-            data, lons, lats, dep = read_varGroup(inpath, varname)
-        else:
-            data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
+        data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
         upper = zupper
         lower = zlower
     else:
@@ -260,9 +236,8 @@ if __name__ == "__main__":
    dataGFS = ind["dataGFS"] or "False"
    type = ind["type"] or "inc"
    variable = ind["variable"]
-   varGroup = ind["varGroup"] or "False"
    data3D = ind["data3D"] or "True"
-   qc = ind["qc"] or "False"
+   qc = ind["qc"]
    zupper = ind["zupper"] or "0"
    zlower = ind["zlower"] or "0"
    hupper = ind["hupper"] or "50000"
@@ -275,4 +250,5 @@ if __name__ == "__main__":
    vmin = ind["vmin"] or "-100" 
    
    print(dataGFS,type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
-   gen_figure(input,output,dataGFS,type,variable,varGroup,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+
+   gen_figure(input,output,dataGFS,type,variable,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
