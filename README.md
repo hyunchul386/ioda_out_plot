@@ -1,4 +1,6 @@
 # ioda_plot
+# module use /work/noaa/da/Hyun-Chul.Lee/modulefiles
+# module load anaconda/1.7.2.1
 <p>
 This is a plotting suite for ioda format data, expanded from <br>
 /scratch1/NCEPDEV/da/Cory.R.Martin/JEDI/tutorial_dec2020/python/plot_jedi_obs.py <br>

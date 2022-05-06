@@ -1,41 +1,60 @@
-#-- input dir
-indir: "/work/noaa/da/Hyun-Chul.Lee/soca-science-3dvar_100_5d/obs_out/2011102612/ctrl/"
-#indir: "/scratch2/NCEPDEV/climate/Hyun-Chul.Lee/JEDI/tutorial/work/gfsanl/Data/hofx"
-#indir: "./"
+#-- input configs
+wdir: "/work/noaa/marine/Hyun-Chul.Lee/emc4/obs_out/2020"
+wdat: "2020060300"
+#invf: "sst_noaa19_l3u_so025"
+invf: "temp_profile_fnmoc"
+#invf: "sst_metopa_l3u_so025"
 
 #-- input file name
-#infile: "sondes_tsen_3dvar-gfs_2020102812_0000.nc4"
-#infile: "sst_avhrr19.20111026.nc"
-infile: "insitu_prof_T.20111026.nc"
+#infile: "insitu_wod.20150705.nc"
+#infile: "insitu_wod.20150705_ombg_T.nc"
+#infile: "insitu_wod.20150705_ombg_S.nc"
+#infile: "sst_noaa19.20150705_ombg_T.nc"
+#infile: "sss_smap.jpl.20150705_ombg_S.nc"
+#infile: "sss_trak_fnmoc.20200603.nc"
+#indir: "${{wdir}}/${{wdat}}/ctrl"
+#infile: "${{invf}}.${{wdat}}.nc"
+infile:
 
 #-- input dataGFS from GFS : "default=False (JEDI/SOCA)"
 dataGFS: "False"
 
 #-- variable name to plot
-variable: sea_water_temperature
-#variable: sea_surface_temperature
+variable: "sea_water_temperature"
+#variable: sea_water_salinity
+#variable: "sea_surface_temperature"
+#variable: "sea_surface_salinity"
 #variable: air_temperature
 
+#-- in netcdf variables are in group or not : default=False, if True then type is the group name
+varGroup: "True"
+
 #-- data 2D/3D : default="True" (3D)
-data3D:
+data3D: "True"
+#data3D: "False"
 
 #-- output file name
 #outfile: "sondes_tsen_3dvar-gfs_2020102812_0000.png"
 #outfile: "sst_avhrr19.20111026.png"
-outfile: "insitu_prof_T.20111026.nc.png"
+#outfile: "insitu_prof_T.20111026.nc.png"
+#outfile: "insitu_prof_S.20111026.nc.png"
+#outfile: "sst_noaa19.20150705_ombg_T.png"
+#outfile: "sss_smap.jpl.20150705_ombg_S.png"
+#outfile: "${{invf}}.${{wdat}}.png"
+outfile: 
 
 #-- output dir
-outdir: "./"
+outdir: "./Out_png/"
 
 #-- type : "hofx0-2, ombg, oman", default="inc"
 #type: "ombg"
-type: "ombg"
+type: "ObsValue"
 
 #-- qc : include good QC check
-qc: "True"
+qc: "False"
 
 #-- zupper : "upper depth in OCN", default=0
-zupper: 30
+zupper: 0
 
 #-- zlower : "lower depth in OCN", default=0
 zlower: 50

@@ -6,6 +6,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import netCDF4 as nc
+from netCDF4 import Dataset
 import numpy as np
 import argparse
 import glob
@@ -24,7 +25,7 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
     lonb = []
     datb = []
 
-   #print(upper, lower, Xupper, Xlower, Yupper, Ylower, Vmx, Vmn)
+    print(upper, lower, Xupper, Xlower, Yupper, Ylower, Vmx, Vmn)
    #--- Xlower/Xupper
     if (float(Xlower) < -180):
         Xlower = float(Xlower) + 360
@@ -66,12 +67,16 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
             vmin = vmax * -1.0
             cmap = 'bwr'
         else:
-            vmax = float(Vmx)
-            vmin = float(Vmn)
+          # vmax = float(Vmx)
+          # vmin = float(Vmn)
+            vmin = np.nanmin(data)
+            vmax = np.nanmax(data)
             cmap = 'bwr'
     else:
-        vmax = float(Vmx)
-        vmin = float(Vmn)
+      # vmax = float(Vmx)
+      # vmax = float(Vmx)
+        vmin = np.nanmin(data)
+        vmax = np.nanmax(data)
         cmap = 'rainbow'
     #--- depth filtering
     if ( dataGFS == "True"):
@@ -140,6 +145,7 @@ def read_2d_var(datapath, varname, datatype, qcflag):
     dep = qc*0
     if (qcflag):
         data[qc > 0] = np.nan
+    print (max(data), min(data))
     return data, lons, lats, dep
 
 def read_var(datapath, varname, datatype, qcflag):
@@ -196,8 +202,63 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
         data[qc > 0] = np.nan
     return data, lons, lats, dep
 
+def read_varGroup(datapath, varname, datatype, qcflag):
+    obsfiles = glob.glob(datapath+'*')
+    lats = np.array([])
+    lons = np.array([])
+    data = np.array([])
+    qc = np.array([])
+    dep = np.array([])
+    for f in obsfiles:
+        datanc = nc.Dataset(f)
+        lattmp = datanc.groups['MetaData'].variables['latitude'][:]
+        lontmp = datanc.groups['MetaData'].variables['longitude'][:]
+        datatmp = datanc.groups[datatype].variables[varname][:]
+        deptmp = datanc.groups['MetaData'].variables['depth'][:]
+        qctmp = datanc.groups['EffectiveQC0'].variables[varname][:]
+        datanc.close()
+        lats = np.concatenate((lats,lattmp))
+        lons = np.concatenate((lons,lontmp))
+        data = np.concatenate((data,datatmp))
+        dep = np.concatenate((dep,deptmp))
+        qc = np.concatenate((qc,qctmp))
+    if (qcflag):
+        data[qc > 0] = np.nan
+    return data, lons, lats, dep
 
-def gen_figure(inpath, outpath, dataGFS, datatype, varname, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
+def read_2d_varGroup(datapath, varname, datatype, qcflag):
+    obsfiles = glob.glob(datapath+'*')
+    lats = np.array([])
+    lons = np.array([])
+    data = np.array([])
+    qc = np.array([])
+    dep = np.array([])
+    print (datapath, obsfiles)
+    for f in obsfiles:
+       #print (f)
+        datanc = nc.Dataset(f)
+        lattmp = datanc.groups['MetaData'].variables['latitude'][:]
+        lontmp = datanc.groups['MetaData'].variables['longitude'][:]
+        datatmp = datanc.groups[datatype].variables[varname][:]
+       #deptmp = datanc.variables['depth'][:]
+        qctmp = datanc.groups['EffectiveQC0'].variables[varname][:]
+        datanc.close()
+        lats = np.concatenate((lats,lattmp))
+        lons = np.concatenate((lons,lontmp))
+        data = np.concatenate((data,datatmp))
+       #dep = np.concatenate((dep,deptmp))
+        qc = np.concatenate((qc,qctmp))
+    dep = qc*0
+    if (qcflag):
+        data[qc > 0] = np.nan
+
+    print (np.nanmax(data))
+   #print (data)
+   #print (lons)
+    return data, lons, lats, dep
+
+
+def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
    #read the files to get the 2D array to plot
     print(dataGFS, d3d)
     if  dataGFS == "True" :
@@ -205,13 +266,19 @@ def gen_figure(inpath, outpath, dataGFS, datatype, varname, d3d, qc, zupper, zlo
         data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
         upper = hupper
         lower = hlower
-    elif ( d3d ):
-        print(d3d)
-        data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
+    elif ( d3d == "True"):
+        print("d3d=>", d3d)
+        if varGroup == "True" :
+            data, lons, lats, dep = read_varGroup(inpath, varname, datatype, qc)
+        else:
+            data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
         upper = zupper
         lower = zlower
     else:
-        data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
+        if varGroup == "True" :
+            data, lons, lats, dep = read_2d_varGroup(inpath, varname, datatype, qc)
+        else:
+            data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
         upper = 0
         lower = 0
     obstype = '_'.join(inpath.split('/')[-1].split('_')[0:2])
@@ -230,14 +297,23 @@ if __name__ == "__main__":
    #-- availe in PyYAML > 5.1
    ind = yaml.load(inputs, Loader=yaml.FullLoader)
    #ind = yaml.load(inputs)
+
+   wdir = ind["wdir"]
+   wdat = ind["wdat"]
+   ymd = wdat[0:8]
+   print (ymd)
+   invf = ind["invf"]
   
-   input = ind["indir"]+ind["infile"]
-   output =  ind["outdir"]+ind["outfile"]
+#  input = ind["indir"]+ind["infile"]
+   input = ind["infile"] or wdir+"/"+wdat+"/ctrl/"+invf+"."+ymd+".nc"
+#  output =  ind["outdir"]+ind["outfile"]
+   output =  ind["outfile"] or ind["outdir"]+invf+"_"+ind["type"]+"."+wdat+".png"
    dataGFS = ind["dataGFS"] or "False"
    type = ind["type"] or "inc"
    variable = ind["variable"]
+   varGroup = ind["varGroup"] or "False"
    data3D = ind["data3D"] or "True"
-   qc = ind["qc"]
+   qc = ind["qc"] or "False"
    zupper = ind["zupper"] or "0"
    zlower = ind["zlower"] or "0"
    hupper = ind["hupper"] or "50000"
@@ -249,6 +325,7 @@ if __name__ == "__main__":
    vmax = ind["vmax"] or "100" 
    vmin = ind["vmin"] or "-100" 
    
-   print(dataGFS,type,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   print(dataGFS,type,variable,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
 
-   gen_figure(input,output,dataGFS,type,variable,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   gen_figure(input,output,dataGFS,type,variable,varGroup,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+
