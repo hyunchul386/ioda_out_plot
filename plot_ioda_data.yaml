@@ -1,9 +1,17 @@
 #-- input configs
-wdir: "/work/noaa/marine/Hyun-Chul.Lee/emc4/obs_out/2020"
-wdat: "2020060300"
+#wdir: "/work/noaa/marine/Hyun-Chul.Lee/emc4/obs_out/2020"
+#wdir: "/work/noaa/marine/Hyun-Chul.Lee/emc_ref2_noadt/obs_out/2021"
+wdir: "/work/noaa/marine/Hyun-Chul.Lee/emc_ref/obs_out/2021"
+wdat: "2021070118"
 #invf: "sst_noaa19_l3u_so025"
-invf: "temp_profile_fnmoc"
-#invf: "sst_metopa_l3u_so025"
+#invf: "temp_profile_fnmoc"
+#invf: "salt_profile_fnmoc"
+#invf: "sst_metopc_l3u_so025"
+#invf: "sst_viirs_npp_l3u_so025"
+#invf: "sst_viirs_n20_l3u_so025"
+invf: "sst_metopa_l3u_so025"
+#invf: "icec_ssmis_f17_north"
+#invf: "adt_sa_egm2008"
 
 #-- input file name
 #infile: "insitu_wod.20150705.nc"
@@ -14,26 +22,28 @@ invf: "temp_profile_fnmoc"
 #infile: "sss_trak_fnmoc.20200603.nc"
 #indir: "${{wdir}}/${{wdat}}/ctrl"
 #infile: "${{invf}}.${{wdat}}.nc"
-infile:
+infile: 
 
 #-- input dataGFS from GFS : "default=False (JEDI/SOCA)"
 dataGFS: "False"
 
 #-- variable name to plot
-variable: "sea_water_temperature"
+#variable: "sea_water_temperature"
 #variable: sea_water_salinity
-#variable: "sea_surface_temperature"
+variable: "sea_surface_temperature"
 #variable: "sea_surface_salinity"
-#variable: air_temperature
+#variable: absolute_dynamic_topography
+#variable: "sea_ice_area_fraction"
 
 #-- in netcdf variables are in group or not : default=False, if True then type is the group name
 varGroup: "True"
 
 #-- data 2D/3D : default="True" (3D)
-data3D: "True"
-#data3D: "False"
+#data3D: "True"
+data3D: "False"
 
 #-- output file name
+outfile: "sst_metopa_l3u_so025.20210701.png"
 #outfile: "sondes_tsen_3dvar-gfs_2020102812_0000.png"
 #outfile: "sst_avhrr19.20111026.png"
 #outfile: "insitu_prof_T.20111026.nc.png"
@@ -41,14 +51,21 @@ data3D: "True"
 #outfile: "sst_noaa19.20150705_ombg_T.png"
 #outfile: "sss_smap.jpl.20150705_ombg_S.png"
 #outfile: "${{invf}}.${{wdat}}.png"
-outfile: 
+#outfile: "${{invf}}.${{wdat}}_ombg_Kuroshio.png"
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/sst_viirs_npp_l3u_so025_Kuroshio_ref2_noadt.png"  
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/sst_viirs_npp_l3u_so025_Kuroshio_ref2.png"  
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/sst_metopb_GulfStream_ref2_noadt.png"  
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/sst_metopb_GulfStream_ref2.png"  
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/sst_metopb_Kurosio_ref2.png"  
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/Temp_20210901_ref_noadt.png"  
+#outfile: "/work/noaa/da/Hyun-Chul.Lee/ioda_out_plot/Out_png/Salt_20210901_ref_noadt.png"  
 
 #-- output dir
 outdir: "./Out_png/"
 
 #-- type : "hofx0-2, ombg, oman", default="inc"
-#type: "ombg"
-type: "ObsValue"
+type: "ombg"
+#type: "ObsValue"
 
 #-- qc : include good QC check
 qc: "False"
@@ -57,7 +74,7 @@ qc: "False"
 zupper: 0
 
 #-- zlower : "lower depth in OCN", default=0
-zlower: 50
+zlower: 0
 
 #-- hupper : "upper height in ATM", default=50000
 hupper: 
@@ -67,19 +84,30 @@ hlower:
 
 #-- xeast : "upper longitude", default=180
 xeast:
-
 #-- xwest : "lower longitude", default=-180
 xwest:
-
 #-- ynorth : "upper latitude", default=90
 ynorth:
-
 #-- ysouth : "lower latitude", default=-90
 ysouth:
 
+#::: Gulf Stream
+#xeast: 320 
+#xwest: 260
+#ynorth: 45 
+#ysouth: 17
+
+#::: Kuoroshio
+#xeast: 180 
+#xwest: 120
+#ynorth: 48 
+#ysouth: 28
+
 #-- vmax : "maximum value of vaiable", default=100 or calculated for ombg,oman,inc
-vmax:
+vmax: 2
 
 #-- vmin : "nimimum value of vaiable", default=-100 or calculated for ombg,oman,inc
-vmin:
- 
+vmin: -2
+
+#-- cmap : 'bwr', 'RdBu', 'jet', 'rainbow', default:: 'rainbow'
+cmap: "bwr" 

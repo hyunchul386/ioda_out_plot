@@ -13,7 +13,9 @@ import glob
 import os
 import yaml
 
-def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmx, Vmn):
+def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, \
+                   upper, lower, Xupper, Xlower, Yupper, Ylower, Vmx, Vmn,\
+                   data_max,data_min,ymd,d3d,cmapp):
     # plot generic world map
     latf = []
     lonf = []
@@ -45,9 +47,9 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
    #cenlon = 0.5 * ( float(Xupper) + float(Xlower) )
     cenlon = 0.0
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude=cenlon))
-    ax.set_extent([-180, 180, -90, 90])
+    #ax.set_extent([-180, 180, -90, 90])
     #ax.set_extent([-120, 80, -30, 30])
-    #ax.set_extent([float(Xlower), float(Xupper), float(Ylower), float(Yupper)])
+    ax.set_extent([float(Xlower), float(Xupper), float(Ylower), float(Yupper)])
     #ax.add_feature(cfeature.COASTLINE)
     ax.coastlines(resolution='10m');
     cmap = 'viridis'
@@ -55,29 +57,48 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
     if ( dataGFS == "True" ):
         plttitle = '%s platform %s@%s in height %s - %s ' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(lower), str(upper))
     elif ( upper == lower ):
-        plttitle = '%s platform %s@%s at %s m' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper))
+#       plttitle = '%s platform %s@%s at %s m, max: %s  min: %s' \
+#                  % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper),str(data_max),str(data_min))
+        plttitle = '%s platform %s@%s at %s m, in %s' \
+                   % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper),str(ymd))
     else:
-        plttitle = '%s platform %s@%s in %s - %s m' % (metadata['obstype'],metadata['var'],metadata['datatype'],str(upper), str(lower))
-      
+        plttitle = '%s platform %s@%s in %s - %s m, max: %s  min: %s in %s' \
+                   % (metadata['obstype'],metadata['var'],metadata['datatype'],\
+                   str(upper), str(lower),str("%6.2f"%data_max),str("%6.2f"%data_min),str(ymd))
    #if metadata['datatype'] in ['ombg','oman']:
     if metadata['datatype'] in ['ombg','oman','inc']:
+   #if metadata['datatype'] in ['inc']:
         if float(Vmx) == 100:
-            vmax = np.nanmean(data)+np.nanstd(data)*2
-           #vmin = np.nanmean(data)-np.nanstd(data)*2
+         #  vmax = np.nanmean(data)+np.nanstd(data)*2
+         #  vmin = vmax * -1.0
+          
+            vmax = data_max
+            if ( vmax < abs(data_min) ):
+                vmax = abs(data_min)
             vmin = vmax * -1.0
-            cmap = 'bwr'
+
+          # cmap = 'bwr'
+          # cmap = 'RdBu'
+          # cmap = 'jet'
         else:
-          # vmax = float(Vmx)
-          # vmin = float(Vmn)
-            vmin = np.nanmin(data)
-            vmax = np.nanmax(data)
-            cmap = 'bwr'
+            vmax = float(Vmx)
+            vmin = float(Vmn)
+          # vmin = np.nanmin(data)
+          # vmax = np.nanmax(data)
+          # cmap = 'bwr'
+          # cmap = 'RdBu'
+          # cmap = 'jet'
     else:
-      # vmax = float(Vmx)
-      # vmax = float(Vmx)
-        vmin = np.nanmin(data)
-        vmax = np.nanmax(data)
-        cmap = 'rainbow'
+        vmax = float(Vmx)
+        vmin = float(Vmn)
+      # vmin = np.nanmin(data)
+      # vmax = np.nanmax(data)
+      # cmap = 'rainbow'
+#   if ( abs(vmin) == abs(vmax) ):
+      # cmap = 'bwr'
+      # cmap = 'RdBu'
+      # cmap = 'jet'
+
     #--- depth filtering
     if ( dataGFS == "True"):
         for i in range(len(dep)):
@@ -87,32 +108,40 @@ def plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lo
                 datf.append(data[i])
     else:
         for i in range(len(dep)):
-            if ( float(dep[i]) <= float(lower) and float(dep[i]) >= float(upper) ):
+            if ( d3d == "True" and float(dep[i]) <= float(lower) and float(dep[i]) >= float(upper) ):
                 latf.append(lats[i])
                 lonf.append(lons[i])
                 datf.append(data[i])
+            else:
+                latf.append(lats[i])
+                lonf.append(lons[i])
+                datf.append(data[i])
+
     #--- regional filtering
     for i in range(len(datf)):
         if (float(Xupper) >= float(Xlower)):
             if ( lonf[i] <= float(Xupper) and lonf[i] >= float(Xlower) ):
+              # print("case 1:  ",lonf[i], float(Xupper), float(Xlower),latf[i], float(Yupper), float(Ylower))
                 latc.append(latf[i])
                 lonc.append(lonf[i])
                 datc.append(datf[i])
         else:
             if ( ( lonf[i] >= float(Xlower) and lonf[i] <= 180) or \
                ( lonf[i] >= -180 and lonf[i] <= float(Xupper)) ):
+              # print("case 2:  ",lonf[i], float(Xupper), float(Xlower))
                 latc.append(latf[i])
                 lonc.append(lonf[i])
                 datc.append(datf[i])
 
     for i in range(len(datc)):
         if ( latc[i] <= float(Yupper) and latc[i] >= float(Ylower) ):
+         #  print("case 3:  ",lonf[i], float(Xupper), float(Xlower))
             latb.append(latc[i])
             lonb.append(lonc[i])
             datb.append(datc[i])
             
-    cs = plt.scatter(lonb, latb, c=datb, s=10,
-                     cmap=cmap, transform=ccrs.PlateCarree(central_longitude=cenlon),vmin=vmin,vmax=vmax)
+    cs = plt.scatter(lonb, latb, c=datb, s=20,
+                     cmap=cmapp, transform=ccrs.PlateCarree(central_longitude=cenlon),vmin=vmin,vmax=vmax)
     cb = plt.colorbar(cs, orientation='horizontal', shrink=0.5, pad=.04)
     cb.set_label(cbarlabel, fontsize=12)
     plt.title(plttitle)
@@ -130,7 +159,12 @@ def read_2d_var(datapath, varname, datatype, qcflag):
         datanc = nc.Dataset(f)
         lattmp = datanc.variables['latitude@MetaData'][:]
         lontmp = datanc.variables['longitude@MetaData'][:]
-        datatmp = datanc.variables[varname+'@'+datatype][:]
+        if ( datatype == "inc" ):
+            d_ombg = datanc.groups['ombg'].variables[varname][:]
+            d_oman = datanc.groups['oman'].variables[varname][:]
+            datatmp = d_ombg - d_oman
+        else:
+            datatmp = datanc.variables[varname+'@'+datatype][:]
        #deptmp = datanc.variables['depth@MetaData'][:]
         try:
             qctmp = datanc.variables[varname+'@EffectiveQC'][:]
@@ -146,7 +180,9 @@ def read_2d_var(datapath, varname, datatype, qcflag):
     if (qcflag):
         data[qc > 0] = np.nan
     print (max(data), min(data))
-    return data, lons, lats, dep
+    data_max=np.nanmax(data)
+    data_min=np.nanmin(data)
+    return data, lons, lats, dep,data_max,data_min
 
 def read_var(datapath, varname, datatype, qcflag):
     obsfiles = glob.glob(datapath+'*')
@@ -159,7 +195,12 @@ def read_var(datapath, varname, datatype, qcflag):
         datanc = nc.Dataset(f)
         lattmp = datanc.variables['latitude@MetaData'][:]
         lontmp = datanc.variables['longitude@MetaData'][:]
-        datatmp = datanc.variables[varname+'@'+datatype][:]
+        if ( datatype == "inc" ):
+            d_ombg = datanc.groups['ombg'].variables[varname][:]
+            d_oman = datanc.groups['oman'].variables[varname][:]
+            datatmp = d_ombg - d_oman
+        else:
+            datatmp = datanc.variables[varname+'@'+datatype][:]
         deptmp = datanc.variables['depth@MetaData'][:]
         try:
             qctmp = datanc.variables[varname+'@EffectiveQC'][:]
@@ -173,7 +214,9 @@ def read_var(datapath, varname, datatype, qcflag):
         qc = np.concatenate((qc,qctmp))
     if (qcflag):
         data[qc > 0] = np.nan
-    return data, lons, lats, dep
+    data_max=np.nanmax(data)
+    data_min=np.nanmin(data)
+    return data, lons, lats, dep,data_max,data_min
 
 def read_gfs_var(datapath, varname, datatype, qcflag):
     obsfiles = glob.glob(datapath+'*')
@@ -186,7 +229,12 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
         datanc = nc.Dataset(f)
         lattmp = datanc.variables['latitude@MetaData'][:]
         lontmp = datanc.variables['longitude@MetaData'][:]
-        datatmp = datanc.variables[varname+'@'+datatype][:]
+        if ( datatype == "inc" ):
+            d_ombg = datanc.groups['ombg'].variables[varname][:]
+            d_oman = datanc.groups['oman'].variables[varname][:]
+            datatmp = d_ombg - d_oman
+        else:
+            datatmp = datanc.variables[varname+'@'+datatype][:]
         deptmp = datanc.variables['height@MetaData'][:]
         try:
             qctmp = datanc.variables[varname+'@EffectiveQC'][:]
@@ -200,7 +248,9 @@ def read_gfs_var(datapath, varname, datatype, qcflag):
         qc = np.concatenate((qc,qctmp))
     if (qcflag):
         data[qc > 0] = np.nan
-    return data, lons, lats, dep
+    data_max=np.nanmax(data)
+    data_min=np.nanmin(data)
+    return data, lons, lats, dep,data_max,data_min
 
 def read_varGroup(datapath, varname, datatype, qcflag):
     obsfiles = glob.glob(datapath+'*')
@@ -213,7 +263,12 @@ def read_varGroup(datapath, varname, datatype, qcflag):
         datanc = nc.Dataset(f)
         lattmp = datanc.groups['MetaData'].variables['latitude'][:]
         lontmp = datanc.groups['MetaData'].variables['longitude'][:]
-        datatmp = datanc.groups[datatype].variables[varname][:]
+        if ( datatype == "inc" ):
+            d_ombg = datanc.groups['ombg'].variables[varname][:]
+            d_oman = datanc.groups['oman'].variables[varname][:]
+            datatmp = d_ombg - d_oman
+        else:
+            datatmp = datanc.groups[datatype].variables[varname][:]
         deptmp = datanc.groups['MetaData'].variables['depth'][:]
         qctmp = datanc.groups['EffectiveQC0'].variables[varname][:]
         datanc.close()
@@ -224,7 +279,9 @@ def read_varGroup(datapath, varname, datatype, qcflag):
         qc = np.concatenate((qc,qctmp))
     if (qcflag):
         data[qc > 0] = np.nan
-    return data, lons, lats, dep
+    data_max=np.nanmax(data)
+    data_min=np.nanmin(data)
+    return data, lons, lats, dep,data_max,data_min
 
 def read_2d_varGroup(datapath, varname, datatype, qcflag):
     obsfiles = glob.glob(datapath+'*')
@@ -239,7 +296,12 @@ def read_2d_varGroup(datapath, varname, datatype, qcflag):
         datanc = nc.Dataset(f)
         lattmp = datanc.groups['MetaData'].variables['latitude'][:]
         lontmp = datanc.groups['MetaData'].variables['longitude'][:]
-        datatmp = datanc.groups[datatype].variables[varname][:]
+        if ( datatype == "inc" ):
+            d_ombg = datanc.groups['ombg'].variables[varname][:]
+            d_oman = datanc.groups['oman'].variables[varname][:]
+            datatmp = d_ombg - d_oman
+        else:
+            datatmp = datanc.groups[datatype].variables[varname][:]
        #deptmp = datanc.variables['depth'][:]
         qctmp = datanc.groups['EffectiveQC0'].variables[varname][:]
         datanc.close()
@@ -253,32 +315,34 @@ def read_2d_varGroup(datapath, varname, datatype, qcflag):
         data[qc > 0] = np.nan
 
     print (np.nanmax(data))
-   #print (data)
-   #print (lons)
-    return data, lons, lats, dep
+    data_max=np.nanmax(data)
+    data_min=np.nanmin(data)
+    return data, lons, lats, dep,data_max,data_min
 
 
-def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin):
+def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, \
+               d3d, qc, zupper, zlower, hupper, hlower, Xupper, Xlower, \
+               Yupper, Ylower, Vmax, Vmin,ymd,cmapp):
    #read the files to get the 2D array to plot
     print(dataGFS, d3d)
     if  dataGFS == "True" :
         print( "dataGFS:",dataGFS)
-        data, lons, lats, dep = read_gfs_var(inpath, varname, datatype, qc)
+        data, lons, lats, dep,data_max,data_min = read_gfs_var(inpath, varname, datatype, qc)
         upper = hupper
         lower = hlower
     elif ( d3d == "True"):
         print("d3d=>", d3d)
         if varGroup == "True" :
-            data, lons, lats, dep = read_varGroup(inpath, varname, datatype, qc)
+            data, lons, lats, dep,data_max,data_min = read_varGroup(inpath, varname, datatype, qc)
         else:
-            data, lons, lats, dep = read_var(inpath, varname, datatype, qc)
+            data, lons, lats, dep,data_max,data_min = read_var(inpath, varname, datatype, qc)
         upper = zupper
         lower = zlower
     else:
         if varGroup == "True" :
-            data, lons, lats, dep = read_2d_varGroup(inpath, varname, datatype, qc)
+            data, lons, lats, dep,data_max,data_min = read_2d_varGroup(inpath, varname, datatype, qc)
         else:
-            data, lons, lats, dep = read_2d_var(inpath, varname, datatype, qc)
+            data, lons, lats, dep,data_max,data_min = read_2d_var(inpath, varname, datatype, qc)
         upper = 0
         lower = 0
     obstype = '_'.join(inpath.split('/')[-1].split('_')[0:2])
@@ -288,7 +352,8 @@ def gen_figure(inpath, outpath, dataGFS, datatype, varname, varGroup, d3d, qc, z
                 'datatype': datatype,
                 'var': varname,
                 }
-    plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lower, Xupper, Xlower, Yupper, Ylower, Vmax, Vmin)
+    plot_world_map(lons, lats, data, dep, metadata, plotpath, dataGFS, upper, lower, \
+                   Xupper, Xlower, Yupper, Ylower, Vmax, Vmin,data_max,data_min,ymd,d3d,cmapp)
 
 
 if __name__ == "__main__":
@@ -324,8 +389,10 @@ if __name__ == "__main__":
    ysouth = ind["ysouth"] or "-90" 
    vmax = ind["vmax"] or "100" 
    vmin = ind["vmin"] or "-100" 
+   cmapp = ind["cmap"] or "rainbow"
    
    print(dataGFS,type,variable,zupper,zlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
 
-   gen_figure(input,output,dataGFS,type,variable,varGroup,data3D,qc,zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin)
+   gen_figure(input,output,dataGFS,type,variable,varGroup,data3D,qc,\
+              zupper,zlower,hupper,hlower,xeast,xwest,ynorth,ysouth,vmax,vmin,ymd,cmapp)
 
